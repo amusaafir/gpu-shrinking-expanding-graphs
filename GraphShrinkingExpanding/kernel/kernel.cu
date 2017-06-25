@@ -8,8 +8,8 @@ void perform_induction_step(int block_size, int thread_size, int *d_sampled_vert
 	perform_induction_step <<<block_size, thread_size >>>(d_sampled_vertices, d_offsets, d_indices, d_edge_data);
 }
 
-void perform_induction_step_expanding(int block_size, int thread_size, int* d_sampled_vertices, int* d_offsets, int* d_indices, Edge* d_edge_data_expanding, int* d_edge_count_expanding) {
-	perform_induction_step_expanding<<<block_size, thread_size >>>(d_sampled_vertices, d_offsets, d_indices, d_edge_data_expanding, d_edge_count_expanding);
+void perform_induction_step_expanding(int block_size, int thread_size, cudaStream_t stream, int* d_sampled_vertices, int* d_offsets, int* d_indices, Edge* d_edge_data_expanding, int* d_edge_count_expanding) {
+	perform_induction_step_expanding<<<block_size, thread_size,0, stream>>>(d_sampled_vertices, d_offsets, d_indices, d_edge_data_expanding, d_edge_count_expanding);
 }
 
 __device__ int push_edge(Edge &edge, Edge* d_edge_data) {

@@ -101,7 +101,9 @@ void Expanding::expand_graph(char* input_path, char* output_path) {
 
 	_sampler->SAMPLING_FRACTION = SAMPLING_FRACTION;
 
+	cudaStream_t streams[26];
 	for (int i = 0; i < amount_of_sampled_graphs; i++) {
+		cudaStreamCreate(&streams[i]);
 		sampled_vertices_per_graph[i] = _sampler->perform_edge_based_node_sampling_step(coo_list->source, coo_list->destination);
 		printf("\nCollected %d vertices.", sampled_vertices_per_graph[i]->sampled_vertices_size);
 
@@ -121,8 +123,17 @@ void Expanding::expand_graph(char* input_path, char* output_path) {
 		cudaDeviceSynchronize(); // This can be deleted - double check
 
 		printf("\nRunning kernel (induction step) with block size %d and thread size %d:", get_block_size(), get_thread_size());
-		perform_induction_step_expanding(get_block_size(), get_thread_size(), d_sampled_vertices, d_offsets, d_indices, d_edge_data_expanding[i], d_size_collected_edges[i]);
+		perform_induction_step_expanding(get_block_size(), get_thread_size(), streams[i], d_sampled_vertices, d_offsets, d_indices, d_edge_data_expanding[i], d_size_collected_edges[i]);
 		//perform_induction_step_expanding <<<get_block_size(), get_thread_size()>>>(d_sampled_vertices, d_offsets, d_indices, d_edge_data_expanding[i], d_size_collected_edges[i]);
+
+		free(sampled_vertices_per_graph[i]->vertices);
+		free(sampled_vertices_per_graph[i]);
+
+		cudaFree(d_sampled_vertices);
+	}
+
+	for (int i = 0; i < amount_of_sampled_graphs; i++) {
+		//cudaStreamSynchronize(streams[i]);
 
 		// Edge size
 		int h_size_edges_result;
@@ -144,13 +155,12 @@ void Expanding::expand_graph(char* input_path, char* output_path) {
 		// Cleanup
 		delete(sampled_graph_version);
 
-		cudaFree(d_sampled_vertices);
 		cudaFree(d_edge_data_expanding[i]);
 		cudaFree(d_size_collected_edges);
-		free(sampled_vertices_per_graph[i]->vertices);
-		free(sampled_vertices_per_graph[i]);
 	}
 
+
+	cudaDeviceReset();
 	cudaFree(d_offsets);
 	cudaFree(d_indices);
 	free(sampled_vertices_per_graph);
