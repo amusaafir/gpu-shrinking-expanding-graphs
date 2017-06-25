@@ -170,7 +170,12 @@ void perform_induction_step(int* sampled_vertices, int* offsets, int* indices, E
 	}
 }
 
+clock_t t1;
+clock_t t2;
+clock_t total_t;
+
 void perform_sequential_induction_step(int* sampled_vertices, int* offsets, int* indices, std::vector<Edge>& edges) {
+	t1 = clock();
 	for (int p = 0; p < SIZE_VERTICES; p++) {
 		//printf("\n\nVertex %d", p);
 		
@@ -187,8 +192,9 @@ void perform_sequential_induction_step(int* sampled_vertices, int* offsets, int*
 				edges.push_back(edge);
 			}
 		}
-
 	}
+	t2 = clock() - t1;
+	printf("It took me %d clicks (%f seconds).\n", t2, ((float)t2) / CLOCKS_PER_SEC);
 }
 
 __device__ int push_edge_expanding(Edge &edge, Edge* edge_data_expanding, int* d_edge_count_expanding) {
@@ -241,7 +247,7 @@ int main(int argc, char* argv[]) {
 		// ONLY FOR LOCAL TESTING
 		//char* input_path = "C:\\Users\\AJ\\Documents\\example_graph.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\nvgraphtest\\nvGraphExample-master\\nvGraphExample\\web-Stanford.txt";
-		//char* input_path = "C:\\Users\\AJ\\Desktop\\nvgraphtest\\nvGraphExample-master\\nvGraphExample\\web-Stanford_large.txt";
+		char* input_path = "C:\\Users\\AJ\\Desktop\\nvgraphtest\\nvGraphExample-master\\nvGraphExample\\web-Stanford_large.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\edge_list_example.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\roadnet.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\facebook_graph.txt";
@@ -251,17 +257,17 @@ int main(int argc, char* argv[]) {
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\com-orkut.ungraph.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\soc-LiveJournal1.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\coo\\pokec_coo.txt";
-		//char* output_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\output\\fb_sampled.txt";
+		char* output_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\output\\performance_testing.txt";
 
 		/*sample_graph(input_path, output_path, 0.5);
-		
+		*/
 		EXPANDING_FACTOR = 3;
 		SAMPLING_FRACTION = 0.5;
 		SELECTED_TOPOLOGY = STAR;
 		SELECTED_BRIDGE_NODE_SELECTION = RANDOM_NODES;
 		AMOUNT_INTERCONNECTIONS = 10;
 		FORCE_UNDIRECTED_BRIDGES = true;
-		expand_graph(input_path, output_path, EXPANDING_FACTOR);*/
+		expand_graph(input_path, output_path, EXPANDING_FACTOR);
 	}
 
 	return 0;
@@ -664,7 +670,7 @@ void expand_graph(char* input_path, char* output_path, float scaling_factor) {
 	Sampled_Graph_Version* sampled_graph_version_list = new Sampled_Graph_Version[amount_of_sampled_graphs];
 	char current_label = 'a';
 
-	/* Sequential version
+	// Sequential version
 	for (int i = 0; i < amount_of_sampled_graphs; i++) {
 		sampled_vertices_per_graph[i] = perform_edge_based_node_sampling_step(coo_list->source, coo_list->destination, SAMPLING_FRACTION);
 		printf("\nCollected %d vertices.", sampled_vertices_per_graph[i]->sampled_vertices_size);
@@ -685,9 +691,10 @@ void expand_graph(char* input_path, char* output_path, float scaling_factor) {
 		delete(sampled_graph_version);
 		free(sampled_vertices_per_graph[i]->vertices);
 		free(sampled_vertices_per_graph[i]);
-	}*/
-
+	}
+	
 	// Parallell version (GPU CODE)
+	/*
 	int* d_offsets;
 	int* d_indices;
 	gpuErrchk(cudaMalloc((void**)&d_offsets, sizeof(int)*(SIZE_VERTICES + 1)));
@@ -751,8 +758,8 @@ void expand_graph(char* input_path, char* output_path, float scaling_factor) {
 	free(coo_list);
 	free(csr_list->indices);
 	free(csr_list->offsets);
-	free(csr_list);
-
+	free(csr_list);*/
+	
 	// For each sampled graph version, copy the data back to the host
 	std::vector<Bridge_Edge> bridge_edges;
 
