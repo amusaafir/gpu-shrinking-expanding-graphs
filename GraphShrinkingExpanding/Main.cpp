@@ -3,6 +3,7 @@
 #include <string>
 #include "expanding/Expanding.h"
 #include "sampling/Sampling.h"
+#include "sampling/RandomNodeSampling.h"
 
 int main(int argc, char* argv[]) {
 	const int MINIMUM_REQUIRED_INPUT_PARAMETERS = 4;
@@ -37,19 +38,21 @@ int main(int argc, char* argv[]) {
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\edge_list_example.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\roadnet.txt";
 		char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\facebook_graph.txt";
+		//char* input_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\rmatComparison\\graph500original\\graph500_original.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\output_test\\social\\soc-pokec-relationships.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\roadNet-PA.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\soc-pokec-relationships.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\com-orkut.ungraph.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\soc-LiveJournal1.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\coo\\pokec_coo.txt";
-		char* output_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\output\\testresidu.txt";
+		char* output_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\randomnodesampling\\star_expansion.txt";
+		//char* output_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\rmatComparison\\graph500expanded\\graph500fullyconboth1750";
 
 		GraphIO* graph_io = new GraphIO();
 
-		/*Sampling* sampler = new Sampling(graph_io);
-		sampler->SAMPLING_FRACTION = 0.5;
-		sampler->sample_graph(input_path, output_path);*/
+		//RandomNodeSampling* sampler = new RandomNodeSampling(graph_io);
+		//sampler->SAMPLING_FRACTION = 0.5;
+		//sampler->sample_graph(input_path, output_path);
 		
 		Expanding* expander = new Expanding(graph_io);
 		expander->SCALING_FACTOR = 3;
@@ -57,9 +60,10 @@ int main(int argc, char* argv[]) {
 		expander->set_topology(new Star(1, new RandomBridge(), true));
 		expander->SELECTED_BRIDGE_NODE_SELECTION = RANDOM_NODES;
 		expander->FORCE_UNDIRECTED_BRIDGES = true;
-		expander->expand_graph(input_path, output_path);
-
+		//expander->expand_graph(input_path, output_path);
+		expander->expand_graph_random_node_sampling(input_path, output_path);
 		delete(expander);
+
 		delete(graph_io);
 	}
 

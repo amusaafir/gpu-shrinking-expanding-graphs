@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <unordered_set>
+#include <set>
 #include <unordered_map>
 #include <nvgraph.h>
 #include "COOStruct.h"
@@ -12,6 +13,8 @@
 #include "../expanding/BridgeEdgeStruct.h"
 
 class GraphIO {
+private:
+	std::unordered_set<int> _vertices_original_graph;
 public:
 	bool IS_INPUT_FILE_COO = false;
 	int SIZE_VERTICES;
@@ -23,4 +26,5 @@ public:
 	void check(nvgraphStatus_t status);
 	void write_output_to_file(std::vector<Edge>& results, char* output_path);
 	void write_expanded_output_to_file(Sampled_Graph_Version* sampled_graph_version_list, int amount_of_sampled_graphs, std::vector<Bridge_Edge>& bridge_edges, char* ouput_path);
+	std::unordered_set<int>& get_vertices_original_graph();
 };

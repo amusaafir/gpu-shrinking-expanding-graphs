@@ -11,6 +11,7 @@
 #include "../kernel/CudaErrCheck.h"
 #include "../sampling/SampledVerticesStruct.h"
 #include "../sampling/Sampling.h"
+#include "../sampling/RandomNodeSampling.h"
 #include "SampledGraphVersionStruct.h"
 #include "BridgeEdgeStruct.h"
 #include "topology/Star.h"
@@ -25,7 +26,8 @@ typedef enum Bridge_Node_Selection { HIGH_DEGREE_NODES, RANDOM_NODES } Bridge_No
 class Expanding {
 private:
 	GraphIO* _graph_io;
-	Sampling* _sampler;
+	Sampling* _sampler; // TIES
+	RandomNodeSampling* _random_node_sampler;
 	BridgeSelection* _bridge_selection;
 	Topology* _topology;
 public:
@@ -37,7 +39,8 @@ public:
 	float SCALING_FACTOR;
 	int AMOUNT_INTERCONNECTIONS;
 	Bridge_Node_Selection SELECTED_BRIDGE_NODE_SELECTION;
-	void expand_graph(char* input_path, char* output_path);
+	void expand_graph(char*, char*);
+	void expand_graph_random_node_sampling(char*, char*);
 	void collect_expanding_parameters(char* argv[]);
 	int get_thread_size();
 	int get_block_size();

@@ -3,6 +3,7 @@
 Expanding::Expanding(GraphIO* graph_io) {
 	_graph_io = graph_io;
 	_sampler = new Sampling(_graph_io);
+	_random_node_sampler = new RandomNodeSampling(_graph_io);
 }
 
 void Expanding::collect_expanding_parameters(char* argv[]) {
@@ -68,6 +69,75 @@ void Expanding::collect_expanding_parameters(char* argv[]) {
 
 }
 
+
+void Expanding::expand_graph_random_node_sampling(char* input_path, char* output_path) {
+	std::vector<int> source_vertices;
+	std::vector<int> destination_vertices;
+	COO_List* coo_list = _graph_io->load_graph_from_edge_list_file_to_coo(source_vertices, destination_vertices, input_path);
+	CSR_List* csr_list = _graph_io->convert_coo_to_csr_format(coo_list->source, coo_list->destination);
+
+	int amount_of_sampled_graphs = SCALING_FACTOR / SAMPLING_FRACTION;
+
+	float residu = fmod(SCALING_FACTOR, SAMPLING_FRACTION);
+	if (residu > 0) {
+		amount_of_sampled_graphs += 1;
+	}
+
+	printf("Amount of sampled graph versions: %d", amount_of_sampled_graphs);
+
+	Sampled_Vertices** sampled_vertices_per_graph = (Sampled_Vertices**)malloc(sizeof(Sampled_Vertices)*amount_of_sampled_graphs);
+
+	int** d_size_collected_edges = (int**)malloc(sizeof(int*)*amount_of_sampled_graphs);
+	Edge** d_edge_data_expanding = (Edge**)malloc(sizeof(Edge*)*amount_of_sampled_graphs);
+
+	Sampled_Graph_Version* sampled_graph_version_list = new Sampled_Graph_Version[amount_of_sampled_graphs];
+	char current_label_1 = 'a';
+	char current_label_2 = 'a';
+
+	_random_node_sampler->SAMPLING_FRACTION = SAMPLING_FRACTION;
+
+	for (int i = 0; i < amount_of_sampled_graphs; i++) {
+		if (i == amount_of_sampled_graphs - 1) {
+			if (residu>0) {
+				printf("Change sampe fraction to residu");
+				_random_node_sampler->SAMPLING_FRACTION = residu;
+			}
+		}
+
+		std::unordered_set<int> random_nodes = _random_node_sampler->node_selection_step(source_vertices, destination_vertices);
+
+		// (Partial) Induction step
+		std::vector<Edge> edges = _random_node_sampler->induction_step(source_vertices, destination_vertices, random_nodes);
+		
+		Sampled_Graph_Version* sampled_graph_version = new Sampled_Graph_Version();
+		(*sampled_graph_version).edges = edges;
+
+		// Label
+		sampled_graph_version->label_1 = current_label_1;
+		sampled_graph_version->label_2 = current_label_2;
+
+		increment_labels(&current_label_1, &current_label_2);
+
+		// Copy data to the sampled version list
+		sampled_graph_version_list[i] = (*sampled_graph_version);
+
+		// Cleanup
+		delete(sampled_graph_version);
+	}
+
+	// Topology, bridges and interconnections
+	std::vector<Bridge_Edge> bridge_edges;
+	_topology->link(sampled_graph_version_list, amount_of_sampled_graphs, bridge_edges);
+	printf("\nConnected by adding a total of %d bridge edges.", bridge_edges.size());
+
+	// Write expanded graph to output file
+	_graph_io->write_expanded_output_to_file(sampled_graph_version_list, amount_of_sampled_graphs, bridge_edges, output_path);
+
+	// Cleanup
+	delete[] sampled_graph_version_list;
+}
+
+// TODO: refactor (sampling should be a basis for expanding)
 void Expanding::expand_graph(char* input_path, char* output_path) {
 	std::vector<int> source_vertices;
 	std::vector<int> destination_vertices;

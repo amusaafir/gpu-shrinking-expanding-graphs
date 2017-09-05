@@ -169,6 +169,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="expanding\topology\Topology.cpp" />
     <ClCompile Include="io\GraphIO.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="sampling\RandomNodeSampling.cpp" />
     <ClCompile Include="sampling\Sampling.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +190,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="io\GraphIO.h" />
     <ClInclude Include="kernel\kernel.h" />
     <ClInclude Include="expanding\SampledGraphVersionStruct.h" />
+    <ClInclude Include="sampling\RandomNodeSampling.h" />
     <ClInclude Include="sampling\SampledVerticesStruct.h" />
     <ClInclude Include="sampling\Sampling.h" />
   </ItemGroup>

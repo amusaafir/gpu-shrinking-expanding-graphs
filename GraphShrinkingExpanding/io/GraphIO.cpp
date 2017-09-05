@@ -5,7 +5,8 @@ COO_List* GraphIO::load_graph_from_edge_list_file_to_coo(std::vector<int>& sourc
 	FILE* file = fopen(file_path, "r");
 	char line[256];
 	int current_coordinate = 0;
-	if (IS_INPUT_FILE_COO) { // Saves many 'if' ticks inside the while loop - If the input file is already a COO, simply add the coordinates the vectors.
+
+	if (IS_INPUT_FILE_COO) { // TODO: remove
 		std::unordered_set<int> vertices;
 
 		while (fgets(line, sizeof(line), file)) {
@@ -30,19 +31,27 @@ COO_List* GraphIO::load_graph_from_edge_list_file_to_coo(std::vector<int>& sourc
 	}
 	else {
 		std::unordered_map<int, int> map_from_edge_to_coordinate;
+		std::unordered_set<int> vertices;
 		while (fgets(line, sizeof(line), file)) {
 			if (line[0] == '#' || line[0] == '\n') {
 				//print_debug_log("\nEscaped a comment.");
 				continue;
 			}
+
 			// Save source and target vertex (temp)
 			int source_vertex;
 			int target_vertex;
 			sscanf(line, "%d%d\t", &source_vertex, &target_vertex);
+
 			// Add vertices to the source and target arrays, forming an edge accordingly
 			current_coordinate = add_vertex_as_coordinate(source_vertices, map_from_edge_to_coordinate, source_vertex, current_coordinate);
 			current_coordinate = add_vertex_as_coordinate(destination_vertices, map_from_edge_to_coordinate, target_vertex, current_coordinate);
+		
+			// Add vertices to the set
+			vertices.insert(source_vertex);
+			vertices.insert(target_vertex);
 		}
+		_vertices_original_graph = vertices;
 		SIZE_VERTICES = map_from_edge_to_coordinate.size();
 		SIZE_EDGES = source_vertices.size();
 		printf("\nTotal amount of vertices: %zd", SIZE_VERTICES);
@@ -212,4 +221,8 @@ void GraphIO::write_expanded_output_to_file(Sampled_Graph_Version* sampled_graph
 	}
 
 	fclose(output_file);
+}
+
+std::unordered_set<int>& GraphIO::get_vertices_original_graph() {
+	return _vertices_original_graph;
 }
