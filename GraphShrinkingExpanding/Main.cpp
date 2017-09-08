@@ -45,25 +45,26 @@ int main(int argc, char* argv[]) {
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\com-orkut.ungraph.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\soc-LiveJournal1.txt";
 		//char* input_path = "C:\\Users\\AJ\\Desktop\\new_datasets\\coo\\pokec_coo.txt";
-		char* output_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\randomnodesampling\\star_expansion.txt";
+		char* output_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\randomnodesampling\\star_highdegree_1_rns.txt";
 		//char* output_path = "C:\\Users\\AJ\\Dropbox\\personalshit\\Graphpedia\\Output\\rmatComparison\\graph500expanded\\graph500fullyconboth1750";
 
 		GraphIO* graph_io = new GraphIO();
 
-		//RandomNodeSampling* sampler = new RandomNodeSampling(graph_io);
-		//sampler->SAMPLING_FRACTION = 0.5;
-		//sampler->sample_graph(input_path, output_path);
-		
+		/*RandomNodeSampling* sampler = new RandomNodeSampling(graph_io);
+		sampler->SAMPLING_FRACTION = 1.0;
+		sampler->sample_graph(input_path, output_path);
+		delete(sampler);*/
+
 		Expanding* expander = new Expanding(graph_io);
 		expander->SCALING_FACTOR = 3;
 		expander->SAMPLING_FRACTION = 0.5;
-		expander->set_topology(new Star(1, new RandomBridge(), true));
-		expander->SELECTED_BRIDGE_NODE_SELECTION = RANDOM_NODES;
+		expander->set_topology(new Star(1, new HighDegree(), true));
+		expander->SELECTED_BRIDGE_NODE_SELECTION = HIGH_DEGREE_NODES;
 		expander->FORCE_UNDIRECTED_BRIDGES = true;
 		//expander->expand_graph(input_path, output_path);
 		expander->expand_graph_random_node_sampling(input_path, output_path);
 		delete(expander);
-
+		
 		delete(graph_io);
 	}
 
